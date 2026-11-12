@@ -44,6 +44,8 @@ test.describe("Personal Page (About Me)", () => {
     await page.goto("/");
 
     const links = page.locator("main a");
+    await expect(links.first()).toBeVisible();
+
     const count = await links.count();
     expect(count).toBeGreaterThan(0);
 
