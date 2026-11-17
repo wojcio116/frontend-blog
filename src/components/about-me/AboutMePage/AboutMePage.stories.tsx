@@ -1,9 +1,17 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+﻿import type { Meta, StoryObj } from "@storybook/react-vite";
+import { MemoryRouter } from "react-router";
 import { AboutMePage } from "./AboutMePage";
 
 const meta = {
   title: "about-me/AboutMePage",
   component: AboutMePage,
+  decorators: [
+    (Story) => (
+      <MemoryRouter>
+        <Story />
+      </MemoryRouter>
+    ),
+  ],
   parameters: {
     layout: "fullscreen",
   },

@@ -1,4 +1,5 @@
-import { InfoMessage, Section } from "@gi-org-pl/athena";
+﻿import { InfoMessage, Section } from "@gi-org-pl/athena";
+import { Link } from "react-router";
 import type { Article } from "../../../services/api/schemas/article.schema";
 import {
   BLOG_EMPTY_TEST_ID,
@@ -33,7 +34,7 @@ interface ArticleCardProps {
 
 const ArticleCard = ({ article }: ArticleCardProps) => {
   return (
-    <article className="flex min-w-0 flex-col justify-between rounded-lg border border-gi-dark-ash bg-gi-light-gray p-4">
+    <article className="flex min-w-0 flex-col justify-between rounded-lg border border-gi-dark-ash bg-gi-light-gray p-4 transition-colors hover:border-gi-primary">
       <div className="min-w-0">
         <time
           dateTime={article.publishedAt}
@@ -42,7 +43,12 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           {formatArticleDate(article.publishedAt)}
         </time>
         <h3 className="mt-1 break-words wrap-anywhere text-lg font-semibold text-gi-dark-primary">
-          {article.title}
+          <Link
+            to={`/articles/${article.id}`}
+            className="hover:text-gi-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gi-primary"
+          >
+            {article.title}
+          </Link>
         </h3>
         {article.text && (
           <p className="mt-2 line-clamp-3 break-words wrap-anywhere text-sm leading-relaxed text-gi-dark-gray">

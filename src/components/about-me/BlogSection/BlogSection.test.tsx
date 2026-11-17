@@ -1,4 +1,6 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+﻿import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as articlesApi from "../../../services/api/client/articlesApi";
 import { BlogSection, BlogSectionView } from "./BlogSection";
@@ -8,6 +10,10 @@ import {
   BLOG_LOADING_TEST_ID,
   BLOG_SECTION_TEST_ID,
 } from "./BlogSection.constants";
+
+const renderWithRouter = (ui: ReactElement) => {
+  return render(<MemoryRouter>{ui}</MemoryRouter>);
+};
 
 describe("BlogSection", () => {
   afterEach(() => {
@@ -21,7 +27,7 @@ describe("BlogSection", () => {
           () => new Promise(() => {}),
         );
 
-        render(<BlogSection />);
+        renderWithRouter(<BlogSection />);
 
         expect(screen.getByTestId(BLOG_SECTION_TEST_ID)).toBeInTheDocument();
         expect(screen.getByTestId(BLOG_LOADING_TEST_ID)).toBeInTheDocument();
@@ -32,7 +38,7 @@ describe("BlogSection", () => {
 
   describe("Given the API answers with articles", () => {
     describe("When BlogSection finishes loading", () => {
-      it("Then displays every article newest first with its title and formatted date", async () => {
+      it("Then displays every article newest first with its title link and formatted date", async () => {
         vi.spyOn(articlesApi, "fetchArticles").mockResolvedValueOnce([
           {
             id: "2",
@@ -48,13 +54,19 @@ describe("BlogSection", () => {
           },
         ]);
 
-        render(<BlogSection />);
+        renderWithRouter(<BlogSection />);
 
         const headings = await screen.findAllByRole("heading", { level: 3 });
         expect(headings.map((h) => h.textContent)).toEqual([
           "Newest Article",
           "Older Article",
         ]);
+        expect(
+          screen.getByRole("link", { name: "Newest Article" }),
+        ).toHaveAttribute("href", "/articles/2");
+        expect(
+          screen.getByRole("link", { name: "Older Article" }),
+        ).toHaveAttribute("href", "/articles/1");
         expect(screen.getByText("Nov 16, 2026")).toBeInTheDocument();
         expect(screen.getByText("Nov 5, 2026")).toBeInTheDocument();
       });
@@ -66,7 +78,7 @@ describe("BlogSection", () => {
       it("Then displays a message that there are no articles yet", async () => {
         vi.spyOn(articlesApi, "fetchArticles").mockResolvedValueOnce([]);
 
-        render(<BlogSection />);
+        renderWithRouter(<BlogSection />);
 
         expect(
           await screen.findByTestId(BLOG_EMPTY_TEST_ID),
@@ -85,7 +97,7 @@ describe("BlogSection", () => {
           new Error("Network Error"),
         );
 
-        render(<BlogSection />);
+        renderWithRouter(<BlogSection />);
 
         expect(
           await screen.findByTestId(BLOG_ERROR_TEST_ID),
@@ -103,7 +115,7 @@ describe("BlogSection", () => {
           new Error("Received invalid articles payload from API"),
         );
 
-        render(<BlogSection />);
+        renderWithRouter(<BlogSection />);
 
         expect(
           await screen.findByTestId(BLOG_ERROR_TEST_ID),
@@ -128,7 +140,7 @@ describe("BlogSection", () => {
             },
           ]);
 
-        render(<BlogSection />);
+        renderWithRouter(<BlogSection />);
 
         const retryButton = await screen.findByRole("button", {
           name: "Try again",
@@ -166,14 +178,14 @@ describe("BlogSection", () => {
           },
         );
 
-        const { unmount } = render(<BlogSection />);
+        const { unmount } = renderWithRouter(<BlogSection />);
         expect(capturedSignal?.aborted).toBe(false);
 
         unmount();
         expect(capturedSignal?.aborted).toBe(true);
 
         rejectRequest?.({ code: "ERR_CANCELED" });
-        const secondMount = render(<BlogSection />);
+        const secondMount = renderWithRouter(<BlogSection />);
         let resolveLate: ((value: articlesApi.Article[]) => void) | undefined;
         vi.spyOn(articlesApi, "fetchArticles").mockImplementationOnce(
           () =>
@@ -183,7 +195,7 @@ describe("BlogSection", () => {
         );
         secondMount.unmount();
 
-        const thirdMount = render(<BlogSection />);
+        const thirdMount = renderWithRouter(<BlogSection />);
         thirdMount.unmount();
         resolveLate?.([]);
         await waitFor(() => {
@@ -200,7 +212,7 @@ describe("BlogSection", () => {
         const longTitle =
           "VeryLongUnbrokenTitleWithoutSpacesThatShouldWrapCleanlyInsideTheCardContainer";
 
-        render(
+        renderWithRouter(
           <BlogSectionView
             onRetry={() => {}}
             state={{

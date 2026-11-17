@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+﻿import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as articlesApi from "../../../services/api/client/articlesApi";
 import { AboutMePage } from "./AboutMePage";
@@ -20,7 +21,11 @@ describe("AboutMePage", () => {
           },
         ]);
 
-        render(<AboutMePage />);
+        render(
+          <MemoryRouter>
+            <AboutMePage />
+          </MemoryRouter>,
+        );
 
         const mainHeading = screen.getByRole("heading", { level: 1 });
         expect(mainHeading).toHaveTextContent("Wojciech Nizborski");
@@ -43,7 +48,11 @@ describe("AboutMePage", () => {
           new Error("API offline"),
         );
 
-        render(<AboutMePage />);
+        render(
+          <MemoryRouter>
+            <AboutMePage />
+          </MemoryRouter>,
+        );
 
         expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
           "Wojciech Nizborski",
