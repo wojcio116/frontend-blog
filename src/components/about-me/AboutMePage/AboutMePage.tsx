@@ -1,5 +1,6 @@
 import { AboutSection } from "../AboutSection/AboutSection";
 import { AuthorHero } from "../AuthorHero/AuthorHero";
+import { BlogSection } from "../BlogSection/BlogSection";
 
 const AUTHOR_LINKS = [
   { label: "GitHub Profile", href: "https://github.com/wojcio116" },
@@ -48,6 +49,7 @@ export const AboutMePage = () => {
           projects={AUTHOR_PROJECTS}
           note="Want to get in touch? Feel free to connect with me through my public GitHub profile above."
         />
+        <BlogSection />
       </div>
     </main>
   );
