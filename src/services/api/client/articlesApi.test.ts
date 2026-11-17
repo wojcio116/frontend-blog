@@ -1,6 +1,9 @@
+﻿import { AxiosError } from "axios";
 import { describe, expect, it, vi } from "vitest";
 import {
   ARTICLES_ENDPOINT,
+  ArticleNotFoundError,
+  fetchArticleById,
   fetchArticles,
   sortArticlesNewestFirst,
 } from "./articlesApi";
@@ -72,6 +75,96 @@ describe("articlesApi", () => {
         await expect(fetchArticles()).rejects.toThrow(
           "Received invalid articles payload from API",
         );
+
+        getSpy.mockRestore();
+      });
+    });
+  });
+
+  describe("Given single article requests", () => {
+    describe("When fetchArticleById is called with a valid ID", () => {
+      it("Then fetches and validates the single article", async () => {
+        const article = {
+          id: "article-42",
+          title: "Single Article",
+          text: "Full article body",
+          publishedAt: "2026-11-17T10:00:00.000Z",
+        };
+        const getSpy = vi
+          .spyOn(httpClient, "get")
+          .mockResolvedValueOnce({ data: article });
+
+        const controller = new AbortController();
+        const result = await fetchArticleById("article-42", controller.signal);
+
+        expect(getSpy).toHaveBeenCalledWith(`${ARTICLES_ENDPOINT}/article-42`, {
+          signal: controller.signal,
+        });
+        expect(result).toEqual(article);
+
+        getSpy.mockRestore();
+      });
+    });
+
+    describe("When fetchArticleById receives an invalid ID format", () => {
+      it("Then throws ArticleNotFoundError without calling HTTP client", async () => {
+        const getSpy = vi.spyOn(httpClient, "get");
+
+        await expect(fetchArticleById("bad/id!")).rejects.toBeInstanceOf(
+          ArticleNotFoundError,
+        );
+        expect(getSpy).not.toHaveBeenCalled();
+
+        getSpy.mockRestore();
+      });
+    });
+
+    describe("When the API returns 404 or 400", () => {
+      it("Then throws ArticleNotFoundError", async () => {
+        const axios404 = new AxiosError(
+          "Not Found",
+          "ERR_BAD_REQUEST",
+          undefined,
+          undefined,
+          {
+            status: 404,
+            statusText: "Not Found",
+            headers: {},
+            config: {} as never,
+            data: {},
+          },
+        );
+        const getSpy = vi
+          .spyOn(httpClient, "get")
+          .mockRejectedValueOnce(axios404);
+
+        await expect(fetchArticleById("missing")).rejects.toBeInstanceOf(
+          ArticleNotFoundError,
+        );
+
+        getSpy.mockRestore();
+      });
+    });
+
+    describe("When the API returns an invalid shape or network error", () => {
+      it("Then throws an error for invalid shape", async () => {
+        const getSpy = vi
+          .spyOn(httpClient, "get")
+          .mockResolvedValueOnce({ data: { id: "1" } });
+
+        await expect(fetchArticleById("1")).rejects.toThrow(
+          "Received invalid article payload from API",
+        );
+
+        getSpy.mockRestore();
+      });
+
+      it("Then rethrows unexpected errors", async () => {
+        const getSpy = vi
+          .spyOn(httpClient, "get")
+          .mockRejectedValueOnce(new Error("Connection reset"));
+
+        await expect(fetchArticleById("1")).rejects.toThrow("Connection reset");
 
         getSpy.mockRestore();
       });

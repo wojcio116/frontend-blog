@@ -1,4 +1,4 @@
-import { Outlet, Scripts } from "react-router";
+﻿import { Outlet, Scripts, ScrollRestoration } from "react-router";
 
 import "./index.css";
 
@@ -12,6 +12,7 @@ export default function App() {
       </head>
       <body>
         <Outlet />
+        <ScrollRestoration />
         <Scripts />
       </body>
     </html>

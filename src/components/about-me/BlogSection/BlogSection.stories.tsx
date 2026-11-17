@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
+﻿import type { Meta, StoryObj } from "@storybook/react-vite";
+import { MemoryRouter } from "react-router";
 import { BlogSectionView } from "./BlogSection";
 
 const SAMPLE_ARTICLES = [
@@ -19,6 +20,13 @@ const SAMPLE_ARTICLES = [
 const meta = {
   title: "about-me/BlogSection",
   component: BlogSectionView,
+  decorators: [
+    (Story) => (
+      <MemoryRouter>
+        <Story />
+      </MemoryRouter>
+    ),
+  ],
   parameters: {
     layout: "padded",
   },
